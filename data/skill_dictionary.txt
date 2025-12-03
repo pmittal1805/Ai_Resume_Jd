@@ -1,0 +1,17 @@
+ai
+ml
+pandas
+python
+numpy
+scikit-learn
+machine learning
+deep learning
+nlp
+streamlit
+flask
+sql
+eda
+data analysis
+data visualization
+java
+spring boot

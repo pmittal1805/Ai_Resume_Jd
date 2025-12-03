@@ -3,13 +3,14 @@ import streamlit as st
 
 from core.parse_resume import extract_resume_text
 from core.parse_jd import clean_jd_text
-from core.skills_extract import load_skill_dictionary, extract_skills_from_text
+from core.skills_extract import load_skill_dictionary, extract_skills
 from core.scoring import compute_skill_match, compute_text_similarity, compute_overall_score
 from core.llm_suggestions import suggest_improvements_stub
 
+
 def main():
     st.set_page_config(page_title="AI Resume & JD Analyzer", layout="wide")
-    st.title("🧠 AI Resume & Job Description Analyzer (ML/NLP Focus)")
+    st.title("🧠 AI Resume & Job Description Analyzer")
 
     st.write("Upload your resume and paste a job description to analyze skill match and fit.")
 
@@ -19,7 +20,11 @@ def main():
         resume_file = st.file_uploader("Upload Resume (PDF or DOCX)", type=["pdf", "docx"])
 
     with col2:
-        jd_text_raw = st.text_area("Paste Job Description here", height=260, placeholder="Paste the full JD here...")
+        jd_text_raw = st.text_area(
+            "Paste Job Description here",
+            height=260,
+            placeholder="Paste the full JD here..."
+        )
 
     if st.button("Analyze"):
 
@@ -37,18 +42,25 @@ def main():
             jd_text = clean_jd_text(jd_text_raw)
 
         # Load skill dictionary
-        skill_dict = load_skill_dictionary()
+        skill_dict = load_skill_dictionary("data/skill_dictionary.txt")
 
-        # Extract skills
+        # Extract skills (FIXED: use extract_skills, not extract_skills_from_text)
         with st.spinner("Extracting skills from resume and JD..."):
-            resume_skills = extract_skills_from_text(resume_text, skill_dict)
-            jd_skills = extract_skills_from_text(jd_text, skill_dict)
+            resume_skills = extract_skills(resume_text, skill_dict)
+            jd_skills = extract_skills(jd_text, skill_dict)
+
+            # Debug lines (optional; you can remove later)
+            st.write("DEBUG JD skills:", jd_skills)
+            st.write("DEBUG Resume skills:", resume_skills)
 
         # Compute scores
         with st.spinner("Computing match scores..."):
             skill_info = compute_skill_match(jd_skills, resume_skills)
             text_sim_pct = compute_text_similarity(jd_text, resume_text)
-            overall_score = compute_overall_score(skill_info["skill_match_pct"], text_sim_pct)
+            overall_score = compute_overall_score(
+                skill_info["skill_match_pct"],
+                text_sim_pct
+            )
 
         # Display results
         st.subheader("📊 Match Overview")
